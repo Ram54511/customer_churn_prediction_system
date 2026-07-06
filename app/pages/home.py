@@ -1,116 +1,104 @@
 import sys
-import os
+import base64
+from pathlib import Path
 import streamlit as st
-sys.path.insert(0, os.path.join(os.getcwd(), "app"))
+
+# path setup
+APP_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(APP_DIR))
+
+from app.config import DATASET_DETAIL
+from app.pages.header import show_header
 from styles.home import apply_home_styles
 from footer import show_footer
-from session import apply_session
 
-# Apply session management
-apply_session()
+# card background images (assests folder at project root)
+ASSETS_DIR = APP_DIR.parent / "assests"
 
-# Apply styles 
+
+# read an image and return it as a base64 data uri, or empty string if missing
+def img_data_uri(filename: str) -> str:
+    path = ASSETS_DIR / filename
+    if not path.exists():
+        return ""
+    encoded = base64.b64encode(path.read_bytes()).decode()
+    return f"data:image/png;base64,{encoded}"
+
+
+# hero section with navbar
+show_header("Exploratory Data Analysis", DATASET_DETAIL)
+
+# dashboard module cards with image backgrounds, badges, and pill button
+def render_modules():
+    st.markdown(
+        """
+<div class="section-title">
+    <h2>Dashboard Modules</h2>
+    <p>Select a section to analyse the churn prediction system.</p>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    modules = [
+        ("Overview",
+         "Dataset summary, churn rate, customer counts, and the key business statistics behind the project.",
+         ["Key metrics", "Research questions"],
+         "/overview", "card-overview", "Open Overview", "overview.png"),
+        ("EDA",
+         "Explore customer patterns, service usage, distributions, and churn behaviour across segments.",
+         ["10+ charts", "Interactive"],
+         "/eda", "card-eda", "Open EDA", "eda.png"),
+        ("Model Results",
+         "Compare Logistic Regression, Random Forest, and XGBoost with tuned thresholds and SMOTE.",
+         ["3 models", "GridSearchCV"],
+         "/model", "card-model", "Open Models", "module result.png"),
+        ("SHAP Analysis",
+         "Understand the main churn drivers using explainable AI, globally and per customer.",
+         ["Explainable AI", "Beeswarm"],
+         "/shap", "card-shap", "Open SHAP", "SHAP.png"),
+        ("Live Prediction",
+         "Enter customer details and generate a real-time churn prediction with retention suggestions.",
+         ["Real-time", "3-model vote"],
+         "/predict", "card-predict", "Open Prediction", "livepreiction.png"),
+    ]
+
+    cards = ""
+    for title, description, badges, href, card_class, cta, image in modules:
+        badge_html = "".join(f'<span class="card-badge">{b}</span>' for b in badges)
+        uri = img_data_uri(image)
+        # image background if the file exists, otherwise the css gradient fallback shows
+        bg_style = f'style="background-image: url({uri});"' if uri else ""
+        cards += f"""<a class="nav-card {card_class}" href="{href}" target="_self" {bg_style}>
+                <div class="card-body">
+                    <h3>{title}</h3>
+                    <p>{description}</p>
+                    <div class="card-badges">{badge_html}</div>
+                    <span class="card-btn">{cta}</span>
+                </div>
+            </a>"""
+
+    st.markdown(f'<div class="module-grid">{cards}</div>', unsafe_allow_html=True)
+
+
+# apply page styles first
 apply_home_styles()
 
-#  Header banner with logout
+# handle logout from navbar
+if st.query_params.get("logout") == "true":
+    st.query_params.clear()
+    st.session_state.clear()
+    st.switch_page("main.py")
+
+# redirect to login if not logged in
+if not st.session_state.get("logged_in"):
+    st.switch_page("main.py")
+
 username = st.session_state.get("username", "admin")
-st.markdown(f"""
-    <div class='home-header'>
-        <div style='text-align:right; margin-bottom:8px;'>
-            <span style='font-size:13px; color:rgba(255,255,255,0.7);'>
-                Hello, {username}
-            </span>
-        </div>
-        <h1>Customer Churn Prediction</h1>
-    </div>
-""", unsafe_allow_html=True)
 
-
-# Logout button below header
-_, _, logout_col = st.columns([6, 2, 1])
-with logout_col:
-    if st.button("⏻ Logout", use_container_width=True):
-        st.session_state.clear()
-        st.query_params.clear()
-        st.switch_page("login.py")
-
+# page sections
 st.markdown("<br>", unsafe_allow_html=True)
+render_modules()
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-
-
-# Cards Row 1
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.markdown("""
-        <div class='nav-card card-overview'>
-            <p class='card-title'>Overview</p>
-            <p class='card-desc'>Dataset summary, churn rate,
-            and key customer statistics from IBM Telco.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div class='link-overview'>", unsafe_allow_html=True)
-    st.page_link("pages/overview.py", label="→  Go to Overview")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-with col2:
-    st.markdown("""
-        <div class='nav-card card-eda'>
-            <p class='card-title'>EDA</p>
-            <p class='card-desc'>Distributions, correlation matrix,
-            and customer segmentation analysis.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div class='link-eda'>", unsafe_allow_html=True)
-    st.page_link("pages/eda.py", label="→  Go to EDA")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-with col3:
-    st.markdown("""
-        <div class='nav-card card-model'>
-            <p class='card-title'>Model Results</p>
-            <p class='card-desc'>Compare Logistic Regression,
-            Random Forest, and XGBoost performance.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div class='link-model'>", unsafe_allow_html=True)
-    st.page_link("pages/model.py", label="→  Go to Model Results")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-
-
-# Cards Row 2
-col4, col5 = st.columns(2)
-with col4:
-    st.markdown("""
-        <div class='nav-card card-shap'>
-            <p class='card-title'>SHAP Analysis</p>
-            <p class='card-desc'>Feature importance and key churn
-            drivers explained with interpretable AI.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div class='link-shap'>", unsafe_allow_html=True)
-    st.page_link("pages/shap.py", label="→  Go to SHAP Analysis")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-with col5:
-    st.markdown("""
-        <div class='nav-card card-predict'>
-            <p class='card-title'>Live Predict</p>
-            <p class='card-desc'>Enter customer details and get
-            a real-time churn prediction from 3 models.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div class='link-predict'>", unsafe_allow_html=True)
-    st.page_link("pages/predict.py", label="→  Go to Live Predict")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-#  Footer
 show_footer()

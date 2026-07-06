@@ -17,4 +17,4 @@ def apply_session():
 
     # Not logged in — redirect to login
     else:
-        st.switch_page("login.py")
+        st.switch_page("main.py")

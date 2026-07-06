@@ -2,255 +2,381 @@ import streamlit as st
 
 
 def apply_home_styles():
-    st.markdown("""
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+    st.markdown(
+        """
+<style>
+    /* hide streamlit sidebar */
+    section[data-testid="stSidebar"] {
+        display: none !important;
+    }
 
-            /* ── Hide Streamlit elements ─────────────────────────── */
-            [data-testid="stSidebar"]        { display: none !important; }
-            [data-testid="collapsedControl"]  { display: none !important; }
-            [data-testid="stToolbar"]         { display: none !important; }
-            [data-testid="stDecoration"]      { display: none !important; }
-            [data-testid="stStatusWidget"]    { display: none !important; }
-            .stAppDeployButton                { display: none !important; }
-            #MainMenu                         { display: none !important; }
-            footer                            { display: none !important; }
+    div[data-testid="collapsedControl"] {
+        display: none !important;
+    }
 
-            /* ── Global ──────────────────────────────────────────── */
-            html, body, .stApp {
-                font-family: 'Poppins', sans-serif;
-                background-color: #f0f4f8;
-            }
-            .block-container {
-                max-width:     100% !important;
-                padding-left:  2.5rem !important;
-                padding-right: 2.5rem !important;
-                padding-top:   1rem !important;
-            }
+    header[data-testid="stHeader"] {
+        background: transparent;
+    }
 
-            /* ── Header banner ───────────────────────────────────── */
-            .home-header {
-                background: linear-gradient(135deg, #0f2742 0%, #1f77b4 100%);
-                border-radius: 16px;
-                padding: 44px 40px;
-                margin-bottom: 32px;
-                text-align: center;
-            }
-            .home-header h1 {
-                font-size: 40px;
-                font-weight: 700;
-                color: white;
-                margin: 0 0 8px 0;
-                letter-spacing: -0.5px;
-            }
-            .home-header p {
-                font-size: 15px;
-                color: rgba(255,255,255,0.8);
-                margin: 0 0 20px 0;
-            }
-            .badge {
-                display: inline-block;
-                background: rgba(255,255,255,0.15);
-                border: 1px solid rgba(255,255,255,0.25);
-                border-radius: 20px;
-                padding: 5px 14px;
-                font-size: 12px;
-                color: white;
-                margin: 3px;
-            }
+    /* full-width fluid layout instead of a fixed centered column */
+    div[data-testid="stMainBlockContainer"],
+    section[data-testid="stMain"] .block-container,
+    .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 3vw !important;
+        padding-right: 3vw !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
 
-            /* ── Nav cards ───────────────────────────────────────── */
-            .nav-card {
-                background: white;
-                border-radius: 16px;
-                padding: 32px 28px 24px 28px;
-                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-                min-height: 180px;
-            }
-            .nav-card::after {
-                content: '';
-                position: absolute;
-                bottom: 0; left: 0; right: 0;
-                height: 4px;
-                border-radius: 0 0 16px 16px;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-            .nav-card:hover {
-                box-shadow: 0 16px 40px rgba(0,0,0,0.12);
-                transform: translateY(-5px);
-            }
-            .nav-card:hover::after {
-                opacity: 1;
-            }
+    /* hero background */
+    .hero-section {
+        background:
+            radial-gradient(circle at top right, rgba(59, 130, 246, 0.45), transparent 35%),
+            linear-gradient(135deg, #020617 0%, #0f172a 45%, #1e3a8a 100%);
+        padding: 22px 28px 42px 28px;
+        border-radius: 30px;
+        color: white;
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.28);
+        position: relative;
+        overflow: hidden;
+    }
 
-            /* ── Card accent colors ──────────────────────────────── */
-            .card-overview { border-top: 4px solid #1f77b4; }
-            .card-eda      { border-top: 4px solid #2ecc71; }
-            .card-model    { border-top: 4px solid #ff7f0e; }
-            .card-shap     { border-top: 4px solid #9b59b6; }
-            .card-predict  { border-top: 4px solid #e74c3c; }
+    /* navbar inside hero */
+    .top-navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 12px 14px;
+        margin-bottom: 38px;
+        background: rgba(255, 255, 255, 0.10);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        backdrop-filter: blur(14px);
+    }
 
-            .card-overview::after { background: linear-gradient(90deg, #1f77b4, #4fa3d1); }
-            .card-eda::after      { background: linear-gradient(90deg, #2ecc71, #27ae60); }
-            .card-model::after    { background: linear-gradient(90deg, #ff7f0e, #e05c00); }
-            .card-shap::after     { background: linear-gradient(90deg, #9b59b6, #6c3483); }
-            .card-predict::after  { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: white;
+        font-size: 16px;
+        font-weight: 850;
+        white-space: nowrap;
+    }
 
-            .num-overview { background: rgba(31,119,180,0.1);  color: #1f77b4; }
-            .num-eda      { background: rgba(46,204,113,0.1);  color: #27ae60; }
-            .num-model    { background: rgba(255,127,14,0.1);  color: #ff7f0e; }
-            .num-shap     { background: rgba(155,89,182,0.1);  color: #9b59b6; }
-            .num-predict  { background: rgba(231,76,60,0.1);   color: #e74c3c; }
+    .brand-dot {
+        color: #38bdf8;
+        font-size: 16px;
+    }
 
-            /* ── Card text ───────────────────────────────────────── */
-            .card-title {
-                font-size: 20px;
-                font-weight: 700;
-                color: #0f2742;
-                margin: 0 0 10px 0;
-            }
-            .card-desc {
-                font-size: 13px;
-                color: #6c757d;
-                line-height: 1.7;
-                margin: 0;
-            }
+    .nav-links {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex: 1;
+    }
 
-            /* ── Go to button ────────────────────────────────────── */
-            .stPageLink a {
-                display: inline-block !important;
-                width: 100% !important;
-                text-align: center !important;
-                padding: 11px 20px !important;
-                border-radius: 10px !important;
-                font-size: 14px !important;
-                font-weight: 600 !important;
-                text-decoration: none !important;
-                letter-spacing: 0.3px !important;
-                transition: all 0.25s ease !important;
-                margin-top: 4px !important;
-                box-sizing: border-box !important;
-            }
+    .nav-links a {
+        color: rgba(255, 255, 255, 0.82) !important;
+        text-decoration: none !important;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 10px 13px;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
 
-            /* ── Overview button ─────────────────────────────────── */
-            .link-overview .stPageLink a {
-                background: rgba(31,119,180,0.06) !important;
-                color: #1f77b4 !important;
-                border: 1.5px solid #1f77b4 !important;
-            }
-            .link-overview .stPageLink a:hover {
-                background: linear-gradient(90deg, #1f77b4, #4fa3d1) !important;
-                color: white !important;
-                border-color: transparent !important;
-                box-shadow: 0 6px 20px rgba(31,119,180,0.35) !important;
-                transform: translateY(-2px) !important;
-                letter-spacing: 1px !important;
-            }
+    .nav-links a:hover {
+        background: rgba(255, 255, 255, 0.16);
+        color: white !important;
+    }
 
-            /* ── EDA button ──────────────────────────────────────── */
-            .link-eda .stPageLink a {
-                background: rgba(46,204,113,0.06) !important;
-                color: #27ae60 !important;
-                border: 1.5px solid #27ae60 !important;
-            }
-            .link-eda .stPageLink a:hover {
-                background: linear-gradient(90deg, #2ecc71, #27ae60) !important;
-                color: white !important;
-                border-color: transparent !important;
-                box-shadow: 0 6px 20px rgba(46,204,113,0.35) !important;
-                transform: translateY(-2px) !important;
-                letter-spacing: 1px !important;
-            }
+    .logout-btn {
+        background: #ef4444;
+        color: white !important;
+        text-decoration: none !important;
+        padding: 10px 16px;
+        border-radius: 13px;
+        font-size: 14px;
+        font-weight: 800;
+        transition: all 0.2s ease;
+        box-shadow: 0 10px 24px rgba(239, 68, 68, 0.28);
+        white-space: nowrap;
+    }
 
-            /* ── Model button ────────────────────────────────────── */
-            .link-model .stPageLink a {
-                background: rgba(255,127,14,0.06) !important;
-                color: #ff7f0e !important;
-                border: 1.5px solid #ff7f0e !important;
-            }
-            .link-model .stPageLink a:hover {
-                background: linear-gradient(90deg, #ff7f0e, #e05c00) !important;
-                color: white !important;
-                border-color: transparent !important;
-                box-shadow: 0 6px 20px rgba(255,127,14,0.35) !important;
-                transform: translateY(-2px) !important;
-                letter-spacing: 1px !important;
-            }
+    .logout-btn:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
 
-            /* ── SHAP button ─────────────────────────────────────── */
-            .link-shap .stPageLink a {
-                background: rgba(155,89,182,0.06) !important;
-                color: #9b59b6 !important;
-                border: 1.5px solid #9b59b6 !important;
-            }
-            .link-shap .stPageLink a:hover {
-                background: linear-gradient(90deg, #9b59b6, #6c3483) !important;
-                color: white !important;
-                border-color: transparent !important;
-                box-shadow: 0 6px 20px rgba(155,89,182,0.35) !important;
-                transform: translateY(-2px) !important;
-                letter-spacing: 1px !important;
-            }
+    /* hero content */
+    .hero-content {
+        padding-left: 10px;
+    }
 
-            /* ── Predict button ──────────────────────────────────── */
-            .link-predict .stPageLink a {
-                background: rgba(231,76,60,0.06) !important;
-                color: #e74c3c !important;
-                border: 1.5px solid #e74c3c !important;
-            }
-            .link-predict .stPageLink a:hover {
-                background: linear-gradient(90deg, #e74c3c, #c0392b) !important;
-                color: white !important;
-                border-color: transparent !important;
-                box-shadow: 0 6px 20px rgba(231,76,60,0.35) !important;
-                transform: translateY(-2px) !important;
-                letter-spacing: 1px !important;
-            }
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: rgba(255, 255, 255, 0.9);
+        padding: 7px 13px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
 
-            /* ── Logout button ───────────────────────────────────── */
-            .stButton > button {
-                background: rgba(231,76,60,0.08) !important;
-                color: #e74c3c !important;
-                border: 1.5px solid #e74c3c !important;
-                border-radius: 8px !important;
-                font-size: 13px !important;
-                font-weight: 600 !important;
-                white-space: nowrap !important;
-                padding: 8px 20px !important;
-                transition: all 0.2s ease !important;
-                box-shadow: 0 2px 8px rgba(231,76,60,0.15) !important;
-            }
-            .stButton > button:hover {
-                background: linear-gradient(90deg, #e74c3c, #c0392b) !important;
-                color: white !important;
-                border-color: transparent !important;
-                box-shadow: 0 6px 16px rgba(231,76,60,0.35) !important;
-                transform: translateY(-1px) !important;
-            }
+    .welcome-text {
+        margin: 0 0 8px 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 14px;
+        font-weight: 500;
+    }
 
-            /* ── Media queries ───────────────────────────────────── */
-            @media (min-width: 1400px) {
-                .home-header h1 { font-size: 48px !important; }
-                .nav-card       { padding: 36px 32px 28px 32px !important; }
-                .card-title     { font-size: 22px !important; }
-                .card-desc      { font-size: 14px !important; }
-            }
-            @media (max-width: 899px) {
-                .home-header h1 { font-size: 26px !important; }
-                .home-header    { padding: 28px 20px !important; }
-                .nav-card       { padding: 24px 18px 18px 18px !important; }
-                .card-title     { font-size: 16px !important; }
-            }
-            @media (max-width: 600px) {
-                .home-header h1 { font-size: 20px !important; }
-                .home-header    { padding: 20px 14px !important; }
-                .nav-card       { padding: 18px 14px 14px 14px !important; }
-                .card-title     { font-size: 15px !important; }
-                .card-desc      { font-size: 12px !important; }
-            }
-        </style>
-    """, unsafe_allow_html=True)
+    .hero-section h1 {
+        margin: 0;
+        color: white;
+        font-size: clamp(28px, 4.5vw, 48px);
+        font-weight: 850;
+        letter-spacing: -1px;
+        line-height: 1.12;
+    }
+
+    .hero-subtitle {
+        margin-top: 15px;
+        margin-bottom: 0;
+        max-width: 780px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: clamp(14px, 1.6vw, 16px);
+        line-height: 1.65;
+    }
+
+    /* section title */
+    .section-title {
+        margin-bottom: 18px;
+    }
+
+    .section-title h2 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 28px;
+        font-weight: 850;
+    }
+
+    .section-title p {
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 15px;
+    }
+
+    /* module cards: image backgrounds with dark overlay, badges, pill button */
+    .module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 22px;
+    }
+
+    a.nav-card,
+    a.nav-card:hover,
+    a.nav-card:visited,
+    a.nav-card:active {
+        text-decoration: none !important;
+    }
+
+    .nav-card h3,
+    .nav-card p,
+    .nav-card .card-badge,
+    .nav-card .card-btn {
+        text-decoration: none !important;
+    }
+
+    .nav-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: 340px;
+        border-radius: 26px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14);
+        transition: all 0.25s ease;
+        background-size: contain !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-color: #0f172a;
+    }
+
+    .nav-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 26px 55px rgba(15, 23, 42, 0.24);
+    }
+
+    /* dark overlay that fades up from the bottom, keeps text readable on images */
+    .nav-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to top,
+            rgba(2, 6, 23, 0.88) 0%,
+            rgba(2, 6, 23, 0.55) 45%,
+            rgba(2, 6, 23, 0.15) 75%,
+            rgba(2, 6, 23, 0.05) 100%
+        );
+    }
+
+    .card-body {
+        position: relative;
+        z-index: 1;
+        padding: 22px;
+    }
+
+    .nav-card h3 {
+        margin: 0 0 8px 0;
+        color: white !important;
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .nav-card p {
+        margin: 0 0 14px 0;
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .card-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .card-badge {
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(8px);
+        color: rgba(255, 255, 255, 0.92) !important;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .card-btn {
+        display: block;
+        background: white;
+        color: #0f172a !important;
+        text-align: center;
+        padding: 12px 16px;
+        border-radius: 999px;
+        font-size: 15px;
+        font-weight: 800;
+        transition: all 0.2s ease;
+    }
+
+    .nav-card:hover .card-btn {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+    }
+
+    /* per-module gradient fallbacks (show if an image file is missing) */
+    .card-overview {
+        background-image:
+            radial-gradient(circle at 20% 15%, rgba(96, 165, 250, 0.55), transparent 50%),
+            linear-gradient(160deg, #1d4ed8 0%, #1e3a8a 55%, #172554 100%);
+    }
+
+    .card-eda {
+        background-image:
+            radial-gradient(circle at 80% 10%, rgba(103, 232, 249, 0.5), transparent 50%),
+            linear-gradient(160deg, #0e7490 0%, #155e75 55%, #164e63 100%);
+    }
+
+    .card-model {
+        background-image:
+            radial-gradient(circle at 25% 12%, rgba(196, 181, 253, 0.5), transparent 50%),
+            linear-gradient(160deg, #7c3aed 0%, #5b21b6 55%, #3b0764 100%);
+    }
+
+    .card-shap {
+        background-image:
+            radial-gradient(circle at 75% 15%, rgba(253, 186, 116, 0.5), transparent 50%),
+            linear-gradient(160deg, #ea580c 0%, #c2410c 55%, #7c2d12 100%);
+    }
+
+    .card-predict {
+        background-image:
+            radial-gradient(circle at 30% 10%, rgba(134, 239, 172, 0.5), transparent 50%),
+            linear-gradient(160deg, #16a34a 0%, #15803d 55%, #14532d 100%);
+    }
+
+    /* responsive */
+    @media screen and (max-width: 900px) {
+        .top-navbar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .nav-brand {
+            justify-content: center;
+        }
+
+        .nav-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .logout-btn {
+            text-align: center;
+        }
+
+        .hero-content {
+            padding-left: 0;
+        }
+    }
+
+    @media screen and (max-width: 600px) {
+        div[data-testid="stMainBlockContainer"],
+        .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        .hero-section {
+            padding: 18px 18px 30px 18px;
+            border-radius: 22px;
+        }
+
+        .top-navbar {
+            margin-bottom: 24px;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            padding: 8px 10px;
+        }
+
+        .module-grid {
+            gap: 14px;
+        }
+
+        .nav-card {
+            min-height: 300px;
+            border-radius: 22px;
+        }
+
+        .nav-card h3 {
+            font-size: 21px;
+        }
+    }
+</style>
+        """,
+        unsafe_allow_html=True,
+    )
