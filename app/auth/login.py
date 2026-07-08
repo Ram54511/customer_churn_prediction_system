@@ -7,6 +7,7 @@ sys.path.insert(0, str(APP_DIR))
 
 from config import LOGO_PATH, APP_TITLE, USERNAME, PASSWORD
 from styles.login import apply_login_styles
+from auth.token import make_token   # <-- added
 
 
 def show_login_page():
@@ -64,6 +65,7 @@ def show_login_page():
             elif username == USERNAME and password == PASSWORD:
                 st.session_state["logged_in"] = True
                 st.session_state["username"] = username
+                st.query_params["auth"] = make_token(username)   # <-- added
                 st.switch_page("pages/home.py")
 
             else:

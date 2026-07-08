@@ -12,8 +12,10 @@ sys.path.insert(0, _ROOT_DIR)
 
 from config import DATASET_DETAIL
 from theme import apply_theme, TEXT_MUTED, PRIMARY, ACCENT, CHURN_COLOR, RETAINED_COLOR
+from header import show_header
 from footer import show_footer
 from data_loader import load_data
+from auth.guard import require_login
 from calculation.shap_cal import get_shap_stats
 
 
@@ -172,22 +174,13 @@ def render_business_insights():
         )
 
 
-# redirect to login if not logged in
-if not st.session_state.get("logged_in"):
-    st.switch_page("main.py")
+# login guard: restores session from the signed url token
+require_login()
 
 apply_theme()
 
-# back to home
-st.page_link("pages/home.py", label="← Back to Home")
-
-# header
-st.title("SHAP Analysis")
-st.markdown(
-    f"<p style='color:{TEXT_MUTED}; margin-top:-15px;'>{DATASET_DETAIL} — Tuned XGBoost Interpretability</p>",
-    unsafe_allow_html=True,
-)
-st.markdown("---")
+# header bar (handles logout)
+show_header("SHAP Analysis", f"{DATASET_DETAIL} — Tuned XGBoost Interpretability", back=True)
 
 # compute SHAP values (cached, uses the same tuned model as the Model Results page)
 with st.spinner("Computing SHAP values..."):

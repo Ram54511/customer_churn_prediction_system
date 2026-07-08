@@ -7,16 +7,17 @@ import streamlit as st
 APP_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(APP_DIR))
 
-from app.config import DATASET_DETAIL
-from app.pages.header import show_header
+from header import show_header
 from styles.home import apply_home_styles
 from footer import show_footer
+from auth.guard import require_login
 
 # card background images (assests folder at project root)
 ASSETS_DIR = APP_DIR.parent / "assests"
 
 
 # read an image and return it as a base64 data uri, or empty string if missing
+@st.cache_data(show_spinner=False)
 def img_data_uri(filename: str) -> str:
     path = ASSETS_DIR / filename
     if not path.exists():
@@ -25,20 +26,11 @@ def img_data_uri(filename: str) -> str:
     return f"data:image/png;base64,{encoded}"
 
 
-# hero section with navbar
-show_header("Exploratory Data Analysis", DATASET_DETAIL)
-
-# dashboard module cards with image backgrounds, badges, and pill button
+# dashboard module cards: only the button is clickable, links carry the auth token
 def render_modules():
-    st.markdown(
-        """
-<div class="section-title">
-    <h2>Dashboard Modules</h2>
-    <p>Select a section to analyse the churn prediction system.</p>
-</div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # carry the auth token so navigation keeps you logged in
+    token = st.query_params.get("auth", "")
+    q = f"?auth={token}" if token else ""
 
     modules = [
         ("Overview",
@@ -69,14 +61,14 @@ def render_modules():
         uri = img_data_uri(image)
         # image background if the file exists, otherwise the css gradient fallback shows
         bg_style = f'style="background-image: url({uri});"' if uri else ""
-        cards += f"""<a class="nav-card {card_class}" href="{href}" target="_self" {bg_style}>
+        cards += f"""<div class="nav-card {card_class}" {bg_style}>
                 <div class="card-body">
                     <h3>{title}</h3>
                     <p>{description}</p>
                     <div class="card-badges">{badge_html}</div>
-                    <span class="card-btn">{cta}</span>
+                    <a class="card-btn" href="{href}{q}" target="_self">{cta}</a>
                 </div>
-            </a>"""
+            </div>"""
 
     st.markdown(f'<div class="module-grid">{cards}</div>', unsafe_allow_html=True)
 
@@ -84,20 +76,13 @@ def render_modules():
 # apply page styles first
 apply_home_styles()
 
-# handle logout from navbar
-if st.query_params.get("logout") == "true":
-    st.query_params.clear()
-    st.session_state.clear()
-    st.switch_page("main.py")
+# login guard: restores session from the signed url token
+require_login()
 
-# redirect to login if not logged in
-if not st.session_state.get("logged_in"):
-    st.switch_page("main.py")
-
-username = st.session_state.get("username", "admin")
+# header bar (handles logout)
+show_header()
 
 # page sections
-st.markdown("<br>", unsafe_allow_html=True)
 render_modules()
 st.markdown("<br><br>", unsafe_allow_html=True)
 

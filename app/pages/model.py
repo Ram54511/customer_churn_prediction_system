@@ -13,8 +13,10 @@ sys.path.insert(0, _ROOT_DIR)
 
 from config import DATASET_DETAIL
 from theme import apply_theme, TEXT_MUTED, PRIMARY, ACCENT, CHURN_COLOR
+from header import show_header
 from footer import show_footer
 from data_loader import load_data
+from auth.guard import require_login
 from calculation.model_cal import get_model_stats
 
 MODEL_COLORS = [PRIMARY, ACCENT, CHURN_COLOR]
@@ -150,22 +152,13 @@ def render_key_findings(results_df: pd.DataFrame, best_model: str):
                 st.info(body)
 
 
-# redirect to login if not logged in
-if not st.session_state.get("logged_in"):
-    st.switch_page("main.py")
+# login guard: restores session from the signed url token
+require_login()
 
 apply_theme()
 
-# back to home
-st.page_link("pages/home.py", label="← Back to Home")
-
-# header
-st.title("Model Results")
-st.markdown(
-    f"<p style='color:{TEXT_MUTED}; margin-top:-15px;'>{DATASET_DETAIL}</p>",
-    unsafe_allow_html=True,
-)
-st.markdown("---")
+# header bar (handles logout)
+show_header("Model Results", DATASET_DETAIL, back=True)
 
 # load models (trained once, persisted with joblib, cached by Streamlit)
 with st.spinner("Loading models (first run trains & tunes — about 1 min)..."):

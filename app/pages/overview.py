@@ -9,10 +9,12 @@ sys.path.insert(0, _APP_DIR)
 sys.path.insert(0, _ROOT_DIR)
 
 from styles.overview import apply_overview_styles
-from footer import show_footer
 from config import DATASET_DETAIL
 from theme import CHURN_COLOR, RETAINED_COLOR
+from header import show_header
+from footer import show_footer
 from data_loader import load_data
+from auth.guard import require_login
 from calculation.overview_cal import get_overview_stats
 
 
@@ -120,21 +122,13 @@ def render_research_questions():
                 </div>""", unsafe_allow_html=True)
 
 
-# redirect to login if not logged in
-if not st.session_state.get("logged_in"):
-    st.switch_page("main.py")
+# login guard: restores session from the signed url token
+require_login()
 
 apply_overview_styles()
 
-# back to home
-st.page_link("pages/home.py", label="← Back to Home")
-
-# hero
-st.markdown("""
-    <div class='hero' style='align-items:center;'>
-        <h1>Project Overview</h1>
-    </div>
-""", unsafe_allow_html=True)
+# header bar (handles logout)
+show_header("Exploratory Data Analysis", DATASET_DETAIL, back=True)
 
 # load data and compute stats
 stats = get_overview_stats(load_data())

@@ -48,11 +48,19 @@ def apply_header_styles():
     .nav-brand {
         display: flex;
         align-items: center;
-        gap: 9px;
-        color: white;
+        gap: 10px;
+        color: white !important;
+        text-decoration: none !important;
         font-size: 15px;
         font-weight: 850;
         white-space: nowrap;
+    }
+
+    .brand-logo {
+        height: 32px;
+        width: 32px;
+        object-fit: contain;
+        border-radius: 8px;
     }
 
     .brand-dot {
@@ -180,6 +188,30 @@ def apply_header_styles():
         font-size: clamp(24px, 3vw, 32px);
         font-weight: 850;
         letter-spacing: -0.5px;
+    }
+
+    /* back to home button under the header bar */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0 0 14px 0;
+        padding: 8px 14px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        color: #0f172a !important;
+        text-decoration: none !important;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+        border-color: #2563eb;
+        color: #2563eb !important;
+        transform: translateX(-2px);
     }
 
     .page-heading p {
