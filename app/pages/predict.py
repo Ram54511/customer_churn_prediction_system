@@ -1,6 +1,5 @@
 import sys
 import os
-import pandas as pd
 import streamlit as st
 
 # path setup
@@ -9,7 +8,8 @@ _ROOT_DIR = os.path.dirname(_APP_DIR)
 sys.path.insert(0, _APP_DIR)
 sys.path.insert(0, _ROOT_DIR)
 
-from theme import apply_theme, TEXT_MUTED, PRIMARY, CHURN_COLOR, RETAINED_COLOR
+from styles.predict import (apply_predict_styles, PAGE_BG, CARD_BG,
+                             TEAL, CHURN_COLOR, RETAINED_COLOR, AMBER)
 from header import show_header
 from footer import show_footer
 from data_loader import load_data
@@ -17,20 +17,26 @@ from auth.guard import require_login
 from calculation.predict_cal import train_models, predict_churn
 
 
-# load models once and reuse (same tuned pipelines as the Model Results page)
 @st.cache_resource(show_spinner=False)
 def get_cached_models():
     return train_models(load_data())
 
 
-# customer input form, returns the raw input dict
+def section(title: str):
+    st.markdown(f"<p class='pr-section'>{title}</p>", unsafe_allow_html=True)
+
+
+def divider():
+    st.markdown("<div class='pr-divider'></div>", unsafe_allow_html=True)
+
+
+# three-column input form
 def render_input_form() -> dict:
-    st.markdown("### Customer Details")
-    col1, col2, col3 = st.columns(3)
+    section("Customer Details")
+    col1, col2, col3 = st.columns(3, gap="medium")
 
     with col1:
-        st.markdown(f"<p style='color:{PRIMARY}; font-weight:bold;'>Personal Info</p>",
-                    unsafe_allow_html=True)
+        st.markdown("<p class='pr-col-title'>Personal Info</p>", unsafe_allow_html=True)
         gender         = st.selectbox("Gender",         ["Male", "Female"])
         senior_citizen = st.selectbox("Senior Citizen", ["No", "Yes"])
         partner        = st.selectbox("Partner",        ["Yes", "No"])
@@ -38,8 +44,7 @@ def render_input_form() -> dict:
         tenure         = st.slider("Tenure (months)",   0, 72, 12)
 
     with col2:
-        st.markdown(f"<p style='color:{PRIMARY}; font-weight:bold;'>Services</p>",
-                    unsafe_allow_html=True)
+        st.markdown("<p class='pr-col-title'>Services</p>", unsafe_allow_html=True)
         phone_service   = st.selectbox("Phone Service",     ["Yes", "No"])
         multiple_lines  = st.selectbox("Multiple Lines",    ["No", "Yes", "No phone service"])
         internet        = st.selectbox("Internet Service",  ["DSL", "Fiber optic", "No"])
@@ -49,8 +54,7 @@ def render_input_form() -> dict:
         tech_support    = st.selectbox("Tech Support",      ["No", "Yes", "No internet service"])
 
     with col3:
-        st.markdown(f"<p style='color:{PRIMARY}; font-weight:bold;'>Account Info</p>",
-                    unsafe_allow_html=True)
+        st.markdown("<p class='pr-col-title'>Account Info</p>", unsafe_allow_html=True)
         streaming_tv     = st.selectbox("Streaming TV",      ["No", "Yes", "No internet service"])
         streaming_movies = st.selectbox("Streaming Movies",  ["No", "Yes", "No internet service"])
         contract         = st.selectbox("Contract",          ["Month-to-month", "One year", "Two year"])
@@ -87,54 +91,62 @@ def render_input_form() -> dict:
     }
 
 
-# overall verdict banner, majority vote at each model's optimised threshold
+# large verdict banner with majority vote
 def render_verdict_banner(results: dict):
+    section("Prediction Results")
     avg_prob    = round(sum(r["probability"] for r in results.values()) / len(results), 1)
     churn_votes = sum(r["will_churn"] for r in results.values())
 
     if churn_votes >= 2:
-        bg, title = CHURN_COLOR, "High Churn Risk"
+        bg     = f"rgba(226,75,74,0.15)"
+        border = CHURN_COLOR
+        title  = "High Churn Risk"
         detail = f"{churn_votes} of 3 models predict churn (at optimised thresholds)"
+        color  = CHURN_COLOR
     else:
-        bg, title = RETAINED_COLOR, "Low Churn Risk"
+        bg     = f"rgba(29,158,117,0.15)"
+        border = RETAINED_COLOR
+        title  = "Low Churn Risk"
         detail = f"{3 - churn_votes} of 3 models predict this customer stays"
+        color  = RETAINED_COLOR
 
     st.markdown(
-        f"""<div style='background:{bg}; padding:20px; border-radius:10px; text-align:center;'>
-            <h2 style='color:white; margin:0;'>{title}</h2>
-            <h1 style='color:white; margin:5px 0;'>{avg_prob}%</h1>
-            <p style='color:white; margin:0;'>{detail}</p>
-        </div>""",
+        f'<div class="pr-verdict" style="background:{bg};border:1px solid {border}30;">'
+        f'<p class="pr-verdict-title">{title}</p>'
+        f'<p class="pr-verdict-value" style="color:{color};">{avg_prob}%</p>'
+        f'<p class="pr-verdict-detail">{detail}</p>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
 
-# per-model probability cards with their tuned thresholds
+# three model cards
 def render_model_cards(results: dict):
-    st.markdown("### Model Breakdown")
-    cols = st.columns(3)
+    section("Model Breakdown")
 
-    for col, (model_name, res) in zip(cols, results.items()):
+    cards_html = '<div class="pr-model-grid">'
+    for model_name, res in results.items():
         color   = CHURN_COLOR if res["will_churn"] else RETAINED_COLOR
         verdict = "Churn" if res["will_churn"] else "Stay"
-        with col:
-            st.markdown(
-                f"""<div style='background:white; padding:16px; border-radius:8px;
-                            border-top:4px solid {color}; text-align:center;'>
-                    <b style='color:{PRIMARY};'>{model_name}</b><br><br>
-                    <h2 style='color:{color}; margin:0;'>{res["probability"]}%</h2>
-                    <p style='color:{TEXT_MUTED}; font-size:13px; margin:4px 0 0 0;'>
-                        Churn probability<br>
-                        Verdict: <b style='color:{color};'>{verdict}</b>
-                        (threshold {res["threshold"]}%)</p>
-                </div>""",
-                unsafe_allow_html=True,
-            )
+        prob    = res["probability"]
+        cards_html += (
+            f'<div class="pr-model-card" style="border-top:3px solid {color};">'
+            f'<p class="pr-model-name">{model_name}</p>'
+            f'<p class="pr-model-prob" style="color:{color};">{prob}%</p>'
+            f'<p class="pr-model-verdict" style="color:{color};">{verdict}</p>'
+            f'<p class="pr-model-threshold">threshold {res["threshold"]}%</p>'
+            f'<div class="pr-model-bar">'
+            f'<div class="pr-model-fill" style="width:{prob}%;background:{color};"></div>'
+            f'</div>'
+            f'</div>'
+        )
+    cards_html += '</div>'
+    st.markdown(cards_html, unsafe_allow_html=True)
 
 
-# rule-based retention suggestions from known churn drivers
+# retention suggestions
 def render_suggestions(inp: dict):
-    st.markdown("### Retention Suggestions")
+    section("Retention Suggestions")
     suggestions = []
 
     if inp["Contract"] == "Month-to-month":
@@ -150,38 +162,28 @@ def render_suggestions(inp: dict):
     if not suggestions:
         suggestions.append("This customer appears stable. Maintain current service quality.")
 
-    for s in suggestions:
-        st.markdown(
-            f"""<div style='background:white; padding:10px 14px; border-radius:8px;
-                        border-left:4px solid {PRIMARY}; margin-bottom:8px;'>
-                {s}
-            </div>""",
-            unsafe_allow_html=True,
-        )
+    html = "".join(
+        f'<div class="pr-suggestion">{s}</div>'
+        for s in suggestions
+    )
+    st.markdown(html, unsafe_allow_html=True)
 
 
-# login guard: restores session from the signed url token
+# guard and render
 require_login()
+apply_predict_styles()
+show_header(back=True)
 
-apply_theme()
-
-# header bar (handles logout)
-show_header("Live Churn Prediction", "Enter customer details below to predict churn probability", back=True)
-
-# load models (cached, instant after first run)
 with st.spinner("Loading models..."):
     trained = get_cached_models()
 
-# input form
 input_dict = render_input_form()
 st.markdown("<br>", unsafe_allow_html=True)
 
-# predict and show results
 if st.button("Predict Churn", use_container_width=True, type="primary"):
     results = predict_churn(input_dict, trained)
 
-    st.markdown("---")
-    st.markdown("### Prediction Results")
+    st.markdown("<br>", unsafe_allow_html=True)
     render_verdict_banner(results)
     st.markdown("<br>", unsafe_allow_html=True)
     render_model_cards(results)

@@ -9,7 +9,6 @@ sys.path.insert(0, _APP_DIR)
 sys.path.insert(0, _ROOT_DIR)
 
 from styles.overview import apply_overview_styles
-from config import DATASET_DETAIL
 from theme import CHURN_COLOR, RETAINED_COLOR
 from header import show_header
 from footer import show_footer
@@ -18,133 +17,161 @@ from auth.guard import require_login
 from calculation.overview_cal import get_overview_stats
 
 
-# section heading helper
-def section_head(title: str):
-    st.markdown(f"<div class='sec-head'><span></span>{title}</div>", unsafe_allow_html=True)
+@st.cache_data(show_spinner=False)
+def get_cached_stats():
+    return get_overview_stats(load_data())
 
 
-def section_divider():
-    st.markdown("<div class='sec-divider'></div>", unsafe_allow_html=True)
-
-
-# project description card
-def render_about():
-    section_head("About the Project")
-    st.markdown("""
-        <div class='about-card'>
-        Customer churn — the rate at which customers discontinue their relationship with a business —
-        represents one of the most costly challenges facing modern organisations. This project builds a
-        proactive, data-driven pipeline to identify at-risk customers <b>before they churn</b>, enabling
-        targeted retention strategies using machine learning models trained on real telecom data.
-        </div>
-    """, unsafe_allow_html=True)
-
-
-# headline dataset metrics
-def render_dataset_summary(stats: dict):
-    section_head("Dataset Summary")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Customers", f"{stats['total_customers']:,}")
-    col2.metric("Total Features",  str(stats['total_features']))
-    col3.metric("Churned",  f"{stats['churned']:,}",
-                delta=f"-{stats['churn_rate']}%", delta_color="inverse")
-    col4.metric("Retained", f"{stats['retained']:,}",
-                delta=f"+{stats['retention_rate']}%")
-
-
-# financial and tenure metrics
-def render_financial_tenure(stats: dict):
-    section_head("Financial & Tenure Insights")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Avg Monthly Charges", f"${stats['avg_monthly']}")
-    col2.metric("Avg Total Charges",   f"${stats['avg_total']:,.2f}")
-    col3.metric("Avg Tenure",          f"{stats['avg_tenure']} months")
-    col4.metric("Max Tenure",          f"{stats['max_tenure']} months")
-
-
-# demographic metrics
-def render_demographics(stats: dict):
-    section_head("Customer Demographics")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Male Customers",   f"{stats['male_count']:,}")
-    col2.metric("Female Customers", f"{stats['female_count']:,}")
-    col3.metric("Senior Citizens",  f"{stats['senior_count']:,}",
-                delta=f"{stats['senior_pct']}% of total")
-    col4.metric("Has Dependents",   f"{stats['dependents_count']:,}")
-
-
-# one row in the churn breakdown list
-def churn_row(label: str, count: int, rate: float):
-    color = CHURN_COLOR if rate > 20 else RETAINED_COLOR
-    st.markdown(f"""
-        <div class='churn-row' style='border-left:4px solid {color};'>
-            <div>
-                <b style='color:#0f2742;'>{label}</b>
-                <span style='color:#adb5bd; font-size:12px; margin-left:6px;'>{count:,} customers</span>
-            </div>
-            <span style='color:{color}; font-weight:700; font-size:15px;'>{rate}%</span>
-        </div>""", unsafe_allow_html=True)
-
-
-# churn rate by contract type and internet service
-def render_churn_breakdown(stats: dict):
-    section_head("Churn Breakdown")
-    col1, col2 = st.columns(2)
+# two big hero cards: churn rate + retention rate with mini area sparkline
+def render_hero(stats: dict):
+    col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        st.markdown("<p style='font-weight:600; color:#0f2742; margin-bottom:10px;'>By Contract Type</p>",
-                    unsafe_allow_html=True)
-        for _, row in stats["contract_stats"].iterrows():
-            churn_row(row["Contract"], row["Count"], row["ChurnRate"])
+        st.markdown(f"""
+<div class="ov-card">
+    <p class="ov-card-title">Churn Rate</p>
+    <p class="ov-big-metric" style="color:#E24B4A;">{stats['churn_rate']}%</p>
+    <p class="ov-metric-sub">{stats['churned']:,} customers lost</p>
+    <svg viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:60px;">
+        <defs>
+            <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E24B4A" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#E24B4A" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <path d="M0,45 C30,40 50,55 80,35 C110,15 130,50 160,30 C190,10 210,45 240,25 C260,12 280,38 300,20 L300,60 L0,60 Z" fill="url(#rg)"/>
+        <path d="M0,45 C30,40 50,55 80,35 C110,15 130,50 160,30 C190,10 210,45 240,25 C260,12 280,38 300,20" fill="none" stroke="#E24B4A" stroke-width="2"/>
+    </svg>
+</div>""", unsafe_allow_html=True)
 
     with col2:
-        st.markdown("<p style='font-weight:600; color:#0f2742; margin-bottom:10px;'>By Internet Service</p>",
-                    unsafe_allow_html=True)
-        for _, row in stats["internet_stats"].iterrows():
-            churn_row(row["InternetService"], row["Count"], row["ChurnRate"])
+        st.markdown(f"""
+<div class="ov-card">
+    <p class="ov-card-title">Retention Rate</p>
+    <p class="ov-big-metric" style="color:#1D9E75;">{stats['retention_rate']}%</p>
+    <p class="ov-metric-sub">{stats['retained']:,} customers retained</p>
+    <svg viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:60px;">
+        <defs>
+            <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1D9E75" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#1D9E75" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <path d="M0,40 C30,35 50,45 80,25 C110,8 130,38 160,20 C190,5 210,30 240,15 C260,5 280,22 300,10 L300,60 L0,60 Z" fill="url(#gg)"/>
+        <path d="M0,40 C30,35 50,45 80,25 C110,8 130,38 160,20 C190,5 210,30 240,15 C260,5 280,22 300,10" fill="none" stroke="#1D9E75" stroke-width="2"/>
+    </svg>
+</div>""", unsafe_allow_html=True)
 
 
-# dissertation research questions
-def render_research_questions():
-    section_head("Research Questions")
-    col1, col2 = st.columns(2)
-    rqs = [
-        ("RQ1", "Which customer attributes are the strongest predictors of churn?"),
-        ("RQ2", "How do ML models compare in accuracy, precision, and interpretability?"),
-        ("RQ3", "How can churn models be translated into actionable retention strategies?"),
-        ("RQ4", "What role does data visualisation play in communicating insights to stakeholders?"),
+# four small stat cards
+def render_stat_cards(stats: dict):
+    cards = [
+        ("Total customers",  f"{stats['total_customers']:,}", "IBM Telco dataset",  "#a78bfa", 100),
+        ("Total features",   str(stats['total_features']),    "Input variables",    "#60a5fa", 100),
+        ("Avg monthly",      f"${stats['avg_monthly']}",      "per customer",       "#34d399", 100),
+        ("Avg tenure",       f"{stats['avg_tenure']} mo",     "time with company",  "#f59e0b", stats['avg_tenure'] / 72 * 100),
     ]
-    for i, (label, text) in enumerate(rqs):
-        with (col1 if i % 2 == 0 else col2):
-            st.markdown(f"""
-                <div class='rq-card'>
-                    <b>{label}</b> — {text}
-                </div>""", unsafe_allow_html=True)
+    html = '<div class="ov-stat-grid">'
+    for label, value, caption, color, pct in cards:
+        html += f"""
+        <div class="ov-stat-card">
+            <p class="ov-stat-label">{label}</p>
+            <p class="ov-stat-value" style="color:{color};">{value}</p>
+            <p class="ov-stat-caption">{caption}</p>
+            <div class="ov-bar-bg"><div class="ov-bar-fill" style="width:{pct}%;background:{color};"></div></div>
+        </div>"""
+    html += '</div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 
-# login guard: restores session from the signed url token
+# churn breakdown side by side
+def render_churn_breakdown(stats: dict):
+    col1, col2 = st.columns(2, gap="medium")
+
+    def breakdown_card(title, rows, label_col, col):
+        html = f'<div class="ov-card"><p class="ov-card-title">{title}</p>'
+        for _, row in rows.iterrows():
+            rate  = row["ChurnRate"]
+            color = "#E24B4A" if rate > 20 else "#1D9E75"
+            html += f"""
+            <div class="ov-row">
+                <div class="ov-row-meta">
+                    <span class="ov-row-label">{row[label_col]}</span>
+                    <span class="ov-row-rate" style="color:{color};">{rate}%</span>
+                </div>
+                <div class="ov-bar-bg"><div class="ov-bar-fill" style="width:{rate}%;background:{color};"></div></div>
+                <p class="ov-row-count">{row['Count']:,} customers</p>
+            </div>"""
+        html += '</div>'
+        with col:
+            st.markdown(html, unsafe_allow_html=True)
+
+    breakdown_card("Churn by contract",         stats["contract_stats"], "Contract",       col1)
+    breakdown_card("Churn by internet service", stats["internet_stats"], "InternetService", col2)
+
+
+# financial + demographics side by side
+def render_financial_demo(stats: dict):
+    col1, col2 = st.columns(2, gap="medium")
+
+    # financial
+    with col1:
+        cards = [
+            ("Avg monthly charges", f"${stats['avg_monthly']}",     "per customer"),
+            ("Avg total charges",   f"${stats['avg_total']:,.0f}",  "lifetime spend"),
+            ("Max tenure",          f"{stats['max_tenure']} mo",    "longest customer"),
+        ]
+        html = '<div class="ov-card"><p class="ov-card-title">Financial & Tenure</p><div class="ov-fin-grid">'
+        for label, value, caption in cards:
+            html += f"""
+            <div class="ov-fin-card">
+                <p class="ov-stat-label">{label}</p>
+                <p class="ov-fin-value">{value}</p>
+                <p class="ov-stat-caption">{caption}</p>
+            </div>"""
+        html += '</div></div>'
+        st.markdown(html, unsafe_allow_html=True)
+
+    # demographics
+    with col2:
+        total = stats['total_customers']
+        items = [
+            ("Male",            stats['male_count'],       "#60a5fa"),
+            ("Female",          stats['female_count'],     "#a78bfa"),
+            ("Senior citizens", stats['senior_count'],     "#f59e0b"),
+            ("Has dependents",  stats['dependents_count'], "#34d399"),
+        ]
+        html = '<div class="ov-card"><p class="ov-card-title">Demographics</p><div class="ov-demo-grid">'
+        for label, count, color in items:
+            pct = round(count / total * 100, 1)
+            html += f"""
+            <div>
+                <div class="ov-row-meta">
+                    <span class="ov-row-label">{label}</span>
+                    <span class="ov-row-rate" style="color:{color};">{count:,}</span>
+                </div>
+                <div class="ov-bar-bg"><div class="ov-bar-fill" style="width:{pct}%;background:{color};"></div></div>
+                <p class="ov-row-count">{pct}%</p>
+            </div>"""
+        html += '</div></div>'
+        st.markdown(html, unsafe_allow_html=True)
+
+
+# guard and render
 require_login()
-
 apply_overview_styles()
+show_header(back=True)
 
-# header bar (handles logout)
-show_header("Exploratory Data Analysis", DATASET_DETAIL, back=True)
+stats = get_cached_stats()
 
-# load data and compute stats
-stats = get_overview_stats(load_data())
-
-# page sections
-render_about()
-section_divider()
-render_dataset_summary(stats)
-st.markdown("<br>", unsafe_allow_html=True)
-render_financial_tenure(stats)
-section_divider()
-render_demographics(stats)
-section_divider()
+st.markdown("<p class='ov-section-title'>Summary</p>", unsafe_allow_html=True)
+render_hero(stats)
+st.markdown("<div class='ov-divider'></div>", unsafe_allow_html=True)
+render_stat_cards(stats)
+st.markdown("<div class='ov-divider'></div>", unsafe_allow_html=True)
 render_churn_breakdown(stats)
-section_divider()
-render_research_questions()
-section_divider()
+st.markdown("<div class='ov-divider'></div>", unsafe_allow_html=True)
+render_financial_demo(stats)
+st.markdown("<br>", unsafe_allow_html=True)
 
 show_footer()

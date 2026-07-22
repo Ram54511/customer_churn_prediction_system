@@ -3,297 +3,210 @@ import streamlit as st
 
 def apply_overview_styles():
     st.markdown("""
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+<style>
+    [data-testid="stSidebar"]        { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    [data-testid="stToolbar"]        { display: none !important; }
+    #MainMenu                         { display: none !important; }
+    footer                            { display: none !important; }
 
-            /* ── Hide Streamlit elements ─────────────────────────── */
-            [data-testid="stSidebar"]        { display: none !important; }
-            [data-testid="collapsedControl"]  { display: none !important; }
-            [data-testid="stToolbar"]         { display: none !important; }
-            [data-testid="stDecoration"]      { display: none !important; }
-            .stAppDeployButton                { display: none !important; }
-            #MainMenu                         { display: none !important; }
-            footer                            { display: none !important; }
+    html, body, .stApp {
+        background: #1a1033 !important;
+    }
 
-            /* ── Global ──────────────────────────────────────────── */
-            html, body, .stApp {
-                font-family: 'Poppins', sans-serif;
-                background-color: #f0f4f8;
-            }
-            .block-container {
-                max-width:     100% !important;
-                padding-left:  2.5rem !important;
-                padding-right: 2.5rem !important;
-                padding-top:   1rem !important;
-            }
+    .block-container {
+        max-width:     100% !important;
+        padding-left:  2rem !important;
+        padding-right: 2rem !important;
+        padding-top:   0 !important;
+        background:    #1a1033 !important;
+    }
 
-            /* ── Hero header ─────────────────────────────────────── */
-            .hero {
-                background: linear-gradient(135deg, #0f2742 0%, #1a5c99 50%, #1f77b4 100%);
-                border-radius: 20px;
-                padding: 48px 44px;
-                margin-bottom: 32px;
-                position: relative;
-                overflow: hidden;
-            }
-            .hero::before {
-                content: '';
-                position: absolute;
-                top: -60px; right: -60px;
-                width: 240px; height: 240px;
-                background: rgba(255,255,255,0.05);
-                border-radius: 50%;
-            }
-            .hero::after {
-                content: '';
-                position: absolute;
-                bottom: -80px; left: -40px;
-                width: 300px; height: 300px;
-                background: rgba(255,127,14,0.08);
-                border-radius: 50%;
-            }
-            .hero h1 {
-                font-size: 38px;
-                font-weight: 800;
-                color: white;
-                margin: 0 0 8px 0;
-                letter-spacing: -1px;
-            }
-            .hero p {
-                font-size: 15px;
-                color: rgba(255,255,255,0.75);
-                margin: 0;
-            }
+    /* section heading */
+    .ov-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255,255,255,0.45);
+        margin: 0 0 14px 0;
+    }
 
-            /* ── Back link ───────────────────────────────────────── */
-            .stPageLink a {
-                display: inline-flex !important;
-                align-items: center !important;
-                padding: 7px 16px !important;
-                background: white !important;
-                border: 1.5px solid #1f77b4 !important;
-                border-radius: 8px !important;
-                color: #1f77b4 !important;
-                font-size: 13px !important;
-                font-weight: 600 !important;
-                text-decoration: none !important;
-                transition: all 0.2s ease !important;
-                margin-bottom: 12px !important;
-            }
-            .stPageLink a:hover {
-                background: #1f77b4 !important;
-                color: white !important;
-                transform: translateX(-3px) !important;
-            }
+    /* divider */
+    .ov-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.08);
+        margin: 22px 0;
+    }
 
-            /* ── Stat cards ──────────────────────────────────────── */
-            [data-testid="stMetric"] {
-                background: white !important;
-                border-radius: 14px !important;
-                padding: 20px 16px !important;
-                box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
-                border: none !important;
-                position: relative;
-                overflow: hidden;
-                transition: all 0.25s ease !important;
-            }
-            [data-testid="stMetric"]:hover {
-                transform: translateY(-3px) !important;
-                box-shadow: 0 8px 28px rgba(31,119,180,0.15) !important;
-            }
-            [data-testid="stMetricLabel"] p {
-                font-size: 12px !important;
-                font-weight: 600 !important;
-                color: #6c757d !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.5px !important;
-            }
-            [data-testid="stMetricValue"] {
-                font-size: 30px !important;
-                font-weight: 800 !important;
-                color: #0f2742 !important;
-            }
-            [data-testid="stMetricDelta"] {
-                font-size: 13px !important;
-                font-weight: 600 !important;
-            }
+    /* dark card */
+    .ov-card {
+        background: #231845;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 20px 22px;
+        height: 100%;
+    }
 
-            /* ── Section heading ─────────────────────────────────── */
-            .sec-head {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                font-size: 20px;
-                font-weight: 700;
-                color: #0f2742;
-                margin: 0 0 20px 0;
-            }
-            .sec-head span {
-                width: 4px;
-                height: 22px;
-                background: linear-gradient(180deg, #1f77b4, #ff7f0e);
-                border-radius: 4px;
-                display: inline-block;
-            }
+    .ov-card-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: rgba(255,255,255,0.5);
+        margin: 0 0 16px 0;
+    }
 
-            /* ── About card ──────────────────────────────────────── */
-            .about-card {
-                background: white;
-                border-radius: 16px;
-                padding: 28px 32px;
-                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-                font-size: 15px;
-                color: #495057;
-                line-height: 1.9;
-                border-left: 5px solid #1f77b4;
-            }
+    /* big metric inside a card */
+    .ov-big-metric {
+        font-size: 42px;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        margin: 0 0 4px 0;
+    }
 
-            /* ── Churn bar ───────────────────────────────────────── */
-            .churn-row {
-                background: white;
-                padding: 12px 16px;
-                border-radius: 10px;
-                margin-bottom: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                transition: all 0.2s ease;
-            }
-            .churn-row:hover {
-                box-shadow: 0 6px 18px rgba(0,0,0,0.09);
-                transform: translateX(4px);
-            }
+    .ov-metric-sub {
+        font-size: 13px;
+        color: rgba(255,255,255,0.45);
+        margin: 0 0 16px 0;
+    }
 
-            /* ── RQ cards ────────────────────────────────────────── */
-            .rq-card {
-                background: white;
-                border-radius: 12px;
-                padding: 18px 20px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                margin-bottom: 12px;
-                border-top: 3px solid #1f77b4;
-                font-size: 14px;
-                color: #495057;
-                transition: all 0.2s ease;
-            }
-            .rq-card:hover {
-                box-shadow: 0 8px 22px rgba(31,119,180,0.12);
-                transform: translateY(-2px);
-            }
-            .rq-card b { color: #1f77b4; }
+    /* small stat cards row */
+    .ov-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 14px;
+    }
 
-            /* ── Model cards ─────────────────────────────────────── */
-            .model-card {
-                background: white;
-                border-radius: 16px;
-                padding: 28px 22px;
-                text-align: center;
-                box-shadow: 0 2px 14px rgba(0,0,0,0.06);
-                transition: all 0.25s ease;
-                height: 100%;
-            }
-            .model-card:hover {
-                box-shadow: 0 12px 32px rgba(0,0,0,0.11);
-                transform: translateY(-4px);
-            }
-            .model-card .m-icon {
-                font-size: 36px;
-                margin-bottom: 12px;
-            }
-            .model-card h4 {
-                font-size: 16px;
-                font-weight: 700;
-                color: #0f2742;
-                margin: 0 0 8px 0;
-            }
-            .model-card p {
-                font-size: 13px;
-                color: #6c757d;
-                line-height: 1.6;
-                margin: 0;
-            }
-            .model-card .tag {
-                display: inline-block;
-                background: rgba(31,119,180,0.1);
-                color: #1f77b4;
-                border-radius: 20px;
-                padding: 3px 12px;
-                font-size: 11px;
-                font-weight: 600;
-                margin-top: 12px;
-            }
+    .ov-stat-card {
+        background: #231845;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 18px 18px 14px 18px;
+    }
 
-            /* ── Pipeline ────────────────────────────────────────── */
-            .pipe-step {
-                background: white;
-                border-radius: 12px;
-                padding: 16px 20px;
-                margin-bottom: 10px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-                display: flex;
-                align-items: flex-start;
-                gap: 14px;
-                transition: all 0.2s ease;
-            }
-            .pipe-step:hover {
-                box-shadow: 0 6px 20px rgba(31,119,180,0.12);
-                transform: translateX(5px);
-            }
-            .pipe-step .step-num {
-                background: linear-gradient(135deg, #1f77b4, #0f2742);
-                color: white;
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 13px;
-                font-weight: 700;
-                flex-shrink: 0;
-            }
-            .pipe-step .step-title {
-                font-size: 14px;
-                font-weight: 700;
-                color: #0f2742;
-                margin: 0 0 4px 0;
-            }
-            .pipe-step .step-desc {
-                font-size: 12px;
-                color: #6c757d;
-                margin: 0;
-                line-height: 1.5;
-            }
+    .ov-stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: rgba(255,255,255,0.4);
+        margin: 0 0 8px 0;
+    }
 
-            /* ── Tool cards ──────────────────────────────────────── */
-            .tool-card {
-                background: white;
-                border-radius: 14px;
-                padding: 22px 18px;
-                text-align: center;
-                box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-                transition: all 0.2s ease;
-            }
-            .tool-card:hover {
-                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-                transform: translateY(-3px);
-            }
-            .tool-card .t-icon { font-size: 32px; margin-bottom: 10px; }
-            .tool-card h4 { font-size: 14px; font-weight: 700; color: #0f2742; margin: 0 0 6px 0; }
-            .tool-card p  { font-size: 12px; color: #6c757d; margin: 0; line-height: 1.5; }
+    .ov-stat-value {
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+        margin: 0 0 4px 0;
+    }
 
-            /* ── Divider ─────────────────────────────────────────── */
-            .sec-divider {
-                height: 1px;
-                background: linear-gradient(90deg, #e9ecef, transparent);
-                margin: 28px 0;
-            }
+    .ov-stat-caption {
+        font-size: 12px;
+        color: rgba(255,255,255,0.35);
+        margin: 0 0 10px 0;
+    }
 
-            /* ── Media queries ───────────────────────────────────── */
-            @media (max-width: 768px) {
-                .hero h1    { font-size: 26px !important; }
-                .hero        { padding: 28px 20px !important; }
-            }
-        </style>
+    /* shared bar */
+    .ov-bar-bg {
+        background: rgba(255,255,255,0.08);
+        border-radius: 2px;
+        height: 4px;
+        overflow: hidden;
+    }
+
+    .ov-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+    }
+
+    /* breakdown rows */
+    .ov-row {
+        margin-bottom: 16px;
+    }
+
+    .ov-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .ov-row-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .ov-row-label {
+        font-size: 13px;
+        color: rgba(255,255,255,0.75);
+    }
+
+    .ov-row-rate {
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .ov-row-count {
+        font-size: 11px;
+        color: rgba(255,255,255,0.3);
+        margin: 4px 0 0 0;
+    }
+
+    /* demographics */
+    .ov-demo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 18px;
+    }
+
+    /* financial cards */
+    .ov-fin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px;
+    }
+
+    .ov-fin-card {
+        background: #231845;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 18px 18px 14px 18px;
+    }
+
+    .ov-fin-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: white;
+        margin: 0 0 4px 0;
+    }
+
+    /* badge pills */
+    .ov-badge-up {
+        display: inline-block;
+        background: rgba(29,158,117,0.18);
+        color: #1D9E75;
+        border-radius: 6px;
+        padding: 3px 9px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .ov-badge-down {
+        display: inline-block;
+        background: rgba(226,75,74,0.18);
+        color: #E24B4A;
+        border-radius: 6px;
+        padding: 3px 9px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+        .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+    }
+</style>
     """, unsafe_allow_html=True)
